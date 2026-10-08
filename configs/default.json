@@ -1,6 +1,6 @@
 {
   "name": "default-first-phase",
-  "version": 1,
+  "version": 2,
   "model": {
     "algorithm": "CfC",
     "framework": "PyTorch",
@@ -11,9 +11,9 @@
     "training": "supervised_time_series"
   },
   "value_range": [0.0, 1.0],
-  "current_stimulus_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
-  "historical_emotion_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
-  "psychological_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
+  "current_stimulus_dimensions": ["joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation"],
+  "historical_emotion_dimensions": ["joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation"],
+  "psychological_dimensions": ["joy", "trust", "fear", "surprise", "sadness", "disgust", "anger", "anticipation"],
   "behavior_dimensions": ["engagement", "avoidance", "expression", "exploration", "initiative", "activation"],
   "time_step_seconds": 1.0
 }

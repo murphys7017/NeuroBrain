@@ -5,10 +5,13 @@ from typing import Final
 
 CURRENT_STIMULUS_DIMENSIONS: Final[tuple[str, ...]] = (
     "joy",
-    "sadness",
-    "tension",
-    "curiosity",
+    "trust",
+    "fear",
     "surprise",
+    "sadness",
+    "disgust",
+    "anger",
+    "anticipation",
 )
 
 HISTORICAL_EMOTION_DIMENSIONS: Final[tuple[str, ...]] = CURRENT_STIMULUS_DIMENSIONS
@@ -36,9 +39,9 @@ class InputFrame:
 
     def __post_init__(self) -> None:
         if len(self.current_stimulus) != len(CURRENT_STIMULUS_DIMENSIONS):
-            raise ValueError("current stimulus must contain 5 values")
+            raise ValueError("current stimulus must contain 8 values")
         if len(self.historical_emotion) != len(HISTORICAL_EMOTION_DIMENSIONS):
-            raise ValueError("historical emotion must contain 5 values")
+            raise ValueError("historical emotion must contain 8 values")
         if self.delta_seconds < 0.0:
             raise ValueError("delta_seconds must be non-negative")
         values = (*self.current_stimulus, *self.historical_emotion)
@@ -55,7 +58,7 @@ class NeuroState:
 
     def __post_init__(self) -> None:
         if len(self.psychological) != len(PSYCHOLOGICAL_STATE_DIMENSIONS):
-            raise ValueError("psychological state must contain 5 values")
+            raise ValueError("psychological state must contain 8 values")
         if len(self.behavioral) != len(BEHAVIOR_TENDENCY_DIMENSIONS):
             raise ValueError("behavioral state must contain 6 values")
         values = (*self.psychological, *self.behavioral)

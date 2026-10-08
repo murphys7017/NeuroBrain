@@ -41,20 +41,20 @@ NeuroBrain 是一个独立、可训练、持续运行的人工心理动力系统
 
 ### 当前心理刺激
 
-5 个维度：`joy`、`sadness`、`tension`、`curiosity`、`surprise`。每个值范围为 `[0, 1]`，表示当前新增刺激强度，不直接指定最终心理状态。
+8 个维度：`joy`、`trust`、`fear`、`surprise`、`sadness`、`disgust`、`anger`、`anticipation`。每个值范围为 `[0, 1]`，表示当前新增刺激强度，不直接指定最终心理状态。
 
 ### 历史情绪条件
 
-5 个维度，与心理状态维度相同。第一版采用固定条件；在具备训练数据后，再专项验证模型是否学会利用不同历史背景。
+8 个维度，与心理状态维度相同。第一版采用固定条件；在具备训练数据后，再专项验证模型是否学会利用不同历史背景。
 
 ### 输出
 
-- 心理状态：`joy`、`sadness`、`tension`、`curiosity`、`surprise`
+- 心理状态：`joy`、`trust`、`fear`、`surprise`、`sadness`、`disgust`、`anger`、`anticipation`
 - 行为倾向：`engagement`、`avoidance`、`expression`、`exploration`、`initiative`、`activation`
 
 所有输出值暂定为 `[0, 1]`，允许多个维度同时存在。行为倾向表示内在倾向，不等于具体动作指令。
 
-因此第一版协议为 **10 维外部输入、11 维输出**。
+因此当前 v0.2 协议为 **16 维外部输入、14 维输出**。八维情绪是可解释的外部表示，不限制内部隐状态空间。
 
 ## 长期记忆边界
 

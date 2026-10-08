@@ -6,11 +6,11 @@ NeuroBrain 是一个独立、可训练、持续运行的人工心理动力系统
 
 ## 第一阶段基线
 
-- 当前心理刺激：5 维，`joy`、`sadness`、`tension`、`curiosity`、`surprise`
-- 历史情绪条件：5 维，与心理状态维度相同；第一版使用固定预设值
-- 心理状态输出：5 维
+- 当前心理刺激：8 维，采用 `joy`、`trust`、`fear`、`surprise`、`sadness`、`disgust`、`anger`、`anticipation`
+- 历史情绪条件：8 维，与心理状态维度相同；第一版使用固定预设值
+- 心理状态输出：8 维
 - 行为倾向输出：6 维，`engagement`、`avoidance`、`expression`、`exploration`、`initiative`、`activation`
-- 输入合计 10 维，输出合计 11 维
+- 输入合计 16 维，输出合计 14 维
 - 状态和条件值暂定归一化到 `0.0` 至 `1.0`
 
 历史条件是独立语义输入，不能覆盖内部隐状态，也不能被重复当作新的刺激事件。长期具体经历由外部 Memory 系统管理，第一阶段不接入真实 Memory。
