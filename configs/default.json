@@ -1,6 +1,15 @@
 {
   "name": "default-first-phase",
   "version": 1,
+  "model": {
+    "algorithm": "CfC",
+    "framework": "PyTorch",
+    "reference_implementation": "ncps.torch.CfC",
+    "hidden_size": 512,
+    "core_layers": 1,
+    "encoder_features": 32,
+    "training": "supervised_time_series"
+  },
   "value_range": [0.0, 1.0],
   "current_stimulus_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
   "historical_emotion_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],

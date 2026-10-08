@@ -2,7 +2,7 @@
 
 NeuroBrain 是一个独立、可训练、持续运行的人工心理动力系统。它接收当前心理刺激和历史情绪条件，持续演化内部隐状态，并输出心理状态与行为倾向，为虚拟角色、对话系统和 Agent 提供可复用的内部状态层。
 
-项目当前处于初期设计阶段，本文档和 [核心架构与设计规范](docs/architecture.md) 构成当前设计基线。
+项目当前处于模型构建与初始实验阶段，本文档、[核心架构与设计规范](docs/architecture.md) 和 [核心模型技术方案](docs/core-model-technical-plan.md) 构成当前设计基线。
 
 ## 第一阶段基线
 
@@ -39,7 +39,7 @@ uv run pytest
 uv run neurobrain
 ```
 
-当前源码包含第一阶段输入输出协议占位类型，尚未实现最终的心理动力学算法。下一步请阅读 [docs/roadmap.md](docs/roadmap.md)。
+当前源码包含第一阶段输入输出协议占位类型，CfC-512 模型尚未实现。下一步请阅读 [docs/core-model-technical-plan.md](docs/core-model-technical-plan.md) 和 [docs/roadmap.md](docs/roadmap.md)。
 
 ## 设计边界
 
