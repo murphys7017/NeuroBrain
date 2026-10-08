@@ -2,7 +2,8 @@
   "name": "default-first-phase",
   "version": 1,
   "value_range": [0.0, 1.0],
-  "stimulus_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
+  "current_stimulus_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
+  "historical_emotion_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
   "psychological_dimensions": ["joy", "sadness", "tension", "curiosity", "surprise"],
   "behavior_dimensions": ["engagement", "avoidance", "expression", "exploration", "initiative", "activation"],
   "time_step_seconds": 1.0

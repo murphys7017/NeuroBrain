@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Final
 
-INPUT_DIMENSIONS: Final[tuple[str, ...]] = (
+CURRENT_STIMULUS_DIMENSIONS: Final[tuple[str, ...]] = (
     "joy",
     "sadness",
     "tension",
@@ -11,7 +11,10 @@ INPUT_DIMENSIONS: Final[tuple[str, ...]] = (
     "surprise",
 )
 
-PSYCHOLOGICAL_STATE_DIMENSIONS: Final[tuple[str, ...]] = INPUT_DIMENSIONS
+HISTORICAL_EMOTION_DIMENSIONS: Final[tuple[str, ...]] = CURRENT_STIMULUS_DIMENSIONS
+PSYCHOLOGICAL_STATE_DIMENSIONS: Final[tuple[str, ...]] = CURRENT_STIMULUS_DIMENSIONS
+# Backward-compatible alias for the original five-dimensional protocol name.
+INPUT_DIMENSIONS: Final[tuple[str, ...]] = CURRENT_STIMULUS_DIMENSIONS
 
 BEHAVIOR_TENDENCY_DIMENSIONS: Final[tuple[str, ...]] = (
     "engagement",
@@ -21,6 +24,26 @@ BEHAVIOR_TENDENCY_DIMENSIONS: Final[tuple[str, ...]] = (
     "initiative",
     "activation",
 )
+
+
+@dataclass(frozen=True, slots=True)
+class InputFrame:
+    """第一阶段输入协议：当前刺激与历史情绪条件保持语义独立。"""
+
+    current_stimulus: tuple[float, ...]
+    historical_emotion: tuple[float, ...]
+    delta_seconds: float = 1.0
+
+    def __post_init__(self) -> None:
+        if len(self.current_stimulus) != len(CURRENT_STIMULUS_DIMENSIONS):
+            raise ValueError("current stimulus must contain 5 values")
+        if len(self.historical_emotion) != len(HISTORICAL_EMOTION_DIMENSIONS):
+            raise ValueError("historical emotion must contain 5 values")
+        if self.delta_seconds < 0.0:
+            raise ValueError("delta_seconds must be non-negative")
+        values = (*self.current_stimulus, *self.historical_emotion)
+        if any(not 0.0 <= value <= 1.0 for value in values):
+            raise ValueError("input values must be between 0 and 1")
 
 
 @dataclass(frozen=True, slots=True)
