@@ -42,9 +42,13 @@ uv run --locked neurobrain
 uv run --locked python scripts/check_environment.py
 uv run --locked python examples/cfc_smoke.py
 uv run --locked python examples/interactive_demo.py
+uv run --locked python scripts/validate_annotations.py data/annotations/kurisu_trial_v0_compact.jsonl
+uv run --locked python scripts/train.py --data data/annotations/kurisu_trial_v0_compact.jsonl --epochs 20 --val-ratio 0 --history-mode zeros --output artifacts/smoke-cfc512.pt
 ```
 
 当前源码包含第一阶段输入输出协议和 `NeuroBrainModel` CfC-512 实现。环境诊断可运行 `uv run python scripts/check_environment.py`；模型结构、阶段门槛和后续训练范围见 [CfC-512 第一版建立计划](docs/cfc-v0.1-implementation-plan.md)。
+
+训练脚本当前用于训练流程冒烟测试。`kurisu_trial_v0_compact.jsonl` 只有一条序列，运行时应关闭验证集；它可以用于确认数据读取、反向传播、损失下降和 checkpoint 保存，不能用于评估泛化能力。默认 `--history-mode zeros`，避免把标注中的前一时刻目标状态直接作为当前输入；如需专门测试历史字段通路，可显式使用 `--history-mode provided`。
 
 ## 设计边界
 

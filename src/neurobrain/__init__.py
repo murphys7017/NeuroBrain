@@ -2,6 +2,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .data import (
+    AnnotationDataset,
+    AnnotationSequence,
+    SequenceBatch,
+    collate_sequences,
+    load_annotation_sequences,
+)
 from .model import ModelOutput, NeuroBrainModel
 from .protocol import (
     BEHAVIOR_TENDENCY_DIMENSIONS,
@@ -58,6 +65,8 @@ def main() -> None:
 
 __all__ = [
     "BEHAVIOR_TENDENCY_DIMENSIONS",
+    "AnnotationDataset",
+    "AnnotationSequence",
     "CURRENT_STIMULUS_DIMENSIONS",
     "HISTORICAL_EMOTION_DIMENSIONS",
     "INPUT_DIMENSIONS",
@@ -67,4 +76,7 @@ __all__ = [
     "ModelOutput",
     "NeuroBrainModel",
     "NeuroState",
+    "SequenceBatch",
+    "collate_sequences",
+    "load_annotation_sequences",
 ]
