@@ -41,6 +41,7 @@ uv run --locked pytest
 uv run --locked neurobrain
 uv run --locked python scripts/check_environment.py
 uv run --locked python examples/cfc_smoke.py
+uv run --locked python examples/interactive_demo.py
 ```
 
 当前源码包含第一阶段输入输出协议和 `NeuroBrainModel` CfC-512 实现。环境诊断可运行 `uv run python scripts/check_environment.py`；模型结构、阶段门槛和后续训练范围见 [CfC-512 第一版建立计划](docs/cfc-v0.1-implementation-plan.md)。
