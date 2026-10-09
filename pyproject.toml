@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Artificial neural state and behavior engine for continuous character dynamics"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "ncps==1.0.1",
+    "numpy>=2.2.0",
+    "torch==2.9.1+cu126",
+]
 
 [project.scripts]
 neurobrain = "neurobrain:main"
@@ -12,6 +16,17 @@ neurobrain = "neurobrain:main"
 [build-system]
 requires = ["uv_build>=0.11.14,<0.12.0"]
 build-backend = "uv_build"
+
+[tool.uv]
+python-preference = "only-managed"
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download-r2.pytorch.org/whl/cu126"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu126" }
 
 [dependency-groups]
 dev = [

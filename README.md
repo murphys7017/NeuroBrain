@@ -33,13 +33,17 @@ NeuroBrain 是一个独立、可训练、持续运行的人工心理动力系统
 
 需要 Python 3.11+ 和 UV。
 
+UV 使用仓库指定的托管 Python 3.11。首次运行 `uv sync --locked` 会下载 CUDA 版 PyTorch wheel（约 2.4 GiB）；需要可用的 NVIDIA 驱动。PyTorch wheel 已包含 CUDA runtime，日常运行无需另装 CUDA Toolkit。
+
 ```powershell
-uv sync
-uv run pytest
-uv run neurobrain
+uv sync --locked
+uv run --locked pytest
+uv run --locked neurobrain
+uv run --locked python scripts/check_environment.py
+uv run --locked python examples/cfc_smoke.py
 ```
 
-当前源码包含第一阶段输入输出协议占位类型，CfC-512 模型尚未实现。下一步请阅读 [docs/core-model-technical-plan.md](docs/core-model-technical-plan.md) 和 [docs/roadmap.md](docs/roadmap.md)。
+当前源码包含第一阶段输入输出协议和 `NeuroBrainModel` CfC-512 实现。环境诊断可运行 `uv run python scripts/check_environment.py`；模型结构、阶段门槛和后续训练范围见 [CfC-512 第一版建立计划](docs/cfc-v0.1-implementation-plan.md)。
 
 ## 设计边界
 

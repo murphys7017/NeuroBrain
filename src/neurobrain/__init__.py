@@ -1,31 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Final
 
-CURRENT_STIMULUS_DIMENSIONS: Final[tuple[str, ...]] = (
-    "joy",
-    "trust",
-    "fear",
-    "surprise",
-    "sadness",
-    "disgust",
-    "anger",
-    "anticipation",
-)
-
-HISTORICAL_EMOTION_DIMENSIONS: Final[tuple[str, ...]] = CURRENT_STIMULUS_DIMENSIONS
-PSYCHOLOGICAL_STATE_DIMENSIONS: Final[tuple[str, ...]] = CURRENT_STIMULUS_DIMENSIONS
-# Backward-compatible alias for the original five-dimensional protocol name.
-INPUT_DIMENSIONS: Final[tuple[str, ...]] = CURRENT_STIMULUS_DIMENSIONS
-
-BEHAVIOR_TENDENCY_DIMENSIONS: Final[tuple[str, ...]] = (
-    "engagement",
-    "avoidance",
-    "expression",
-    "exploration",
-    "initiative",
-    "activation",
+from .model import ModelOutput, NeuroBrainModel
+from .protocol import (
+    BEHAVIOR_TENDENCY_DIMENSIONS,
+    CURRENT_STIMULUS_DIMENSIONS,
+    HISTORICAL_EMOTION_DIMENSIONS,
+    INPUT_DIMENSIONS,
+    IO_PROTOCOL_VERSION,
+    PSYCHOLOGICAL_STATE_DIMENSIONS,
 )
 
 
@@ -69,4 +53,18 @@ class NeuroState:
 def main() -> None:
     """Run a small smoke check for the initialized package."""
 
-    print("NeuroBrain package initialized; core dynamics are not implemented yet.")
+    print("NeuroBrain CfC-512 package is ready.")
+
+
+__all__ = [
+    "BEHAVIOR_TENDENCY_DIMENSIONS",
+    "CURRENT_STIMULUS_DIMENSIONS",
+    "HISTORICAL_EMOTION_DIMENSIONS",
+    "INPUT_DIMENSIONS",
+    "IO_PROTOCOL_VERSION",
+    "PSYCHOLOGICAL_STATE_DIMENSIONS",
+    "InputFrame",
+    "ModelOutput",
+    "NeuroBrainModel",
+    "NeuroState",
+]
