@@ -1,71 +1,89 @@
 # NeuroBrain
 
-NeuroBrain 是一个独立、可训练、持续运行的人工心理动力系统。它接收当前心理刺激和历史情绪条件，持续演化内部隐状态，并输出心理状态与行为倾向，为虚拟角色、对话系统和 Agent 提供可复用的内部状态层。
+### 让角色拥有连续演化的内在状态
 
-项目当前处于模型构建与初始实验阶段，本文档、[核心架构与设计规范](docs/architecture.md) 和 [核心模型技术方案](docs/core-model-technical-plan.md) 构成当前设计基线。
+NeuroBrain 是一个面向虚拟角色、对话系统与 Agent 的实验性状态引擎。它把当前情绪刺激、历史背景和持续运行的隐状态结合起来，逐步演化出情绪状态与行为倾向，让每次回应都能受到此前经历的影响。
 
-## 第一阶段基线
+语言模型负责理解文本、扮演角色并组织表达；NeuroBrain 负责维护一条独立、可观察的状态演化过程。两者协作，让角色不只“说得像”，也能在系统内部保留情绪变化的连续性。
 
-- 当前心理刺激：8 维，采用 `joy`、`trust`、`fear`、`surprise`、`sadness`、`disgust`、`anger`、`anticipation`
-- 历史情绪条件：8 维，与心理状态维度相同；第一版使用固定预设值
-- 心理状态输出：8 维
-- 行为倾向输出：6 维，`engagement`、`avoidance`、`expression`、`exploration`、`initiative`、`activation`
-- 输入合计 16 维，输出合计 14 维
-- 状态和条件值暂定归一化到 `0.0` 至 `1.0`
+> 当前项目处于早期原型与数据验证阶段。它研究的是可计算的角色状态动力学，不宣称模拟真实人类心理或证明机器意识。
 
-历史条件是独立语义输入，不能覆盖内部隐状态，也不能被重复当作新的刺激事件。长期具体经历由外部 Memory 系统管理，第一阶段不接入真实 Memory。
-
-## 仓库结构
+## 从对话到状态反馈
 
 ```text
-.
-├── configs/              # 实验配置与协议示例
-├── docs/                 # 项目定位、架构、路线图与研究记录
-├── examples/             # 可运行示例
-├── src/neurobrain/       # Python 包源码
-├── tests/                # 自动化测试
-├── pyproject.toml        # 项目元数据与 UV 配置
-├── uv.lock               # UV 锁定文件
-└── README.md
+用户文本
+   ↓
+角色模型提取本轮刺激
+   ↓
+CfC 状态核心结合刺激、历史条件与连续隐状态
+   ↓
+输出情绪状态与行为倾向
+   ↓
+角色模型参考状态生成回应
 ```
 
-## 开始开发
+CfC 接收的是结构化数值，不直接读取文本。文本理解与语言生成由外部模型完成；NeuroBrain 输出的状态再作为角色模型的上下文信号，形成可检查的反馈闭环。
 
-需要 Python 3.11+ 和 UV。
+## 当前原型
 
-UV 使用仓库指定的托管 Python 3.11。首次运行 `uv sync --locked` 会下载 CUDA 版 PyTorch wheel（约 2.4 GiB）；需要可用的 NVIDIA 驱动。PyTorch wheel 已包含 CUDA runtime，日常运行无需另装 CUDA Toolkit。
+- **连续状态演化**：基于 CfC-512，跨对话轮次保留网络隐状态。
+- **清晰的输入输出协议**：16 维输入由当前刺激和历史情绪条件各 8 维组成；14 维输出包括 8 维情绪估计与 6 维行为倾向。当前刺激与历史条件保持独立语义，均使用 `0.0–1.0` 数值。
+- **端到端角色试玩**：命令行程序连接本地 Ollama 或 MiniMax 模型，展示角色回复、情绪与行为估计、意图解读和分阶段耗时。
+- **序列训练工具**：支持 JSONL 序列校验、变长序列批处理与有效时间步掩码，并可保存 checkpoint。
+- **可追踪的实验入口**：保留协议、架构说明、训练计划与研究记录，便于复现实验和继续迭代。
+
+目前的主要目标是验证数据协议、状态闭环和训练流程。现有小说标注是模型生成的初始标注，并非人工确认的心理真值；训练冒烟测试也不代表已验证泛化能力。
+
+协议中的情绪维度为 `joy`、`trust`、`fear`、`surprise`、`sadness`、`disgust`、`anger`、`anticipation`；行为倾向为 `engagement`、`avoidance`、`expression`、`exploration`、`initiative`、`activation`。历史情绪条件提供情境背景，不覆盖 CfC 自身持续传递的隐状态。
+
+## 快速开始
+
+需要 Python 3.11+ 与 [uv](https://docs.astral.sh/uv/)。
 
 ```powershell
 uv sync --locked
 uv run --locked pytest
-uv run --locked neurobrain
-uv run --locked python scripts/check_environment.py
-uv run --locked python examples/cfc_smoke.py
 uv run --locked python examples/interactive_demo.py
-uv run --locked python scripts/validate_annotations.py data/annotations/kurisu_two_volumes_v0.jsonl
-uv run --locked python scripts/train.py --data data/annotations/kurisu_two_volumes_v0.jsonl --epochs 1 --batch-size 1 --val-ratio 0 --history-mode zeros --output artifacts/smoke-cfc512.pt
-uv run --locked python scripts/character_test.py --message "你好，今天想聊什么？"
 ```
 
-当前源码包含第一阶段输入输出协议和 `NeuroBrainModel` CfC-512 实现。环境诊断可运行 `uv run python scripts/check_environment.py`；模型结构、阶段门槛和后续训练范围见 [CfC-512 第一版建立计划](docs/cfc-v0.1-implementation-plan.md)。
+项目锁定了 CUDA 12.6 版 PyTorch wheel。首次同步会下载体积较大的 PyTorch 依赖；具备兼容 NVIDIA 驱动时可使用 CUDA，未检测到 CUDA 时可将模型运行在 CPU 上。
 
-训练脚本当前用于训练流程冒烟测试。`kurisu_two_volumes_v0.jsonl` 是合并后的小说批量初标序列（当前 36 段、1025 个事件），命令使用 `--val-ratio 0` 只为检查数据读取、反向传播和 checkpoint 保存，不用于评估泛化能力。默认 `--history-mode zeros`，避免把标注中的前一时刻目标状态直接作为当前输入；如需专门测试历史字段通路，可显式使用 `--history-mode provided`。这些标注不是人工确认的心理真值。
+### 试用持续对话闭环
 
-`scripts/character_test.py` 是端到端试玩入口。每轮角色模型先为 NeuroBrain 生成本轮情绪刺激 `tendency`，按 0–10 归一化到 0–1；CfC 根据刺激和连续隐状态输出情绪与行为估计，角色模型再参考这些估计形成实际回复，并解释意图与心态。CLI 默认展示用户输入、角色回应、当前心理活动估计和分阶段耗时；`--show-json` 或 `--output` 可查看完整诊断数据，包括供 CfC 使用的模型候选、CfC 输入输出和定时信息。默认使用本地 Ollama 的 `qwen3.5:2b`；也可选择 MiniMax `MiniMax-M2.7`。`--history-mode previous_output` 可测试历史情绪条件通路。
+角色测试 CLI 需要一个 CfC checkpoint 和可用的语言模型。它默认连接本机 Ollama 的 `qwen3.5:2b`，并默认读取 `artifacts/kurisu-two-volumes-baseline-cfc512.pt`。该 checkpoint 属于本地生成产物，不随仓库分发；如需从头体验闭环，可先运行下方的训练流程冒烟命令，再使用生成的 checkpoint。
 
-直接省略 `--message` 就会进入持续对话模式。程序默认把最近 8 轮用户消息和最终角色回复交给小模型，同时保留 CfC 隐状态；输入 `/reset` 清空整段对话和脑状态，输入 `/quit` 退出。`--conversation-turns 0` 可关闭文字历史，只测试 NeuroBrain 的连续状态。
+```powershell
+uv run --locked python scripts/character_test.py --checkpoint artifacts/smoke-cfc512.pt
+```
 
-使用 MiniMax Token Plan 时，把订阅页提供的 Subscription Key（通常以 `sk-cp-` 开头）放在环境变量中；它和按量 API Key 不通用。不要写进代码或提交到仓库：
+省略 `--message` 会进入持续对话；输入 `/reset` 重置 CfC 隐状态和历史条件，输入 `/quit` 退出。加上 `--show-json` 可以查看完整诊断数据。使用 MiniMax 时，将 Subscription Key 放入环境变量后运行：
 
 ```powershell
 $env:MINIMAX_API_KEY = "你的 MiniMax Subscription Key"
-uv run python scripts/character_test.py --provider minimax
+uv run --locked python scripts/character_test.py --provider minimax --checkpoint artifacts/smoke-cfc512.pt
 ```
 
-MiniMax 模式每轮会进行两次模型调用（生成 CfC 情绪输入、根据 CfC 生成角色回应）；可用 `--model`、`--endpoint`、`--api-key-env` 调整模型、接口地址和密钥变量名。Ollama 保持为默认 provider，也可通过 `--provider ollama` 显式选择。
+密钥不要写入代码或提交到仓库。MiniMax 默认使用中国站 OpenAI 兼容接口；国际站密钥可通过 `--endpoint https://api.minimax.io/v1/chat/completions` 指定对应接口。
 
-MiniMax 默认走中国站 Token Plan 的 OpenAI 兼容入口 `https://api.minimax.cn/v1/chat/completions`。如果 Subscription Key 是从国际站获取的，可显式指定 `--endpoint https://api.minimax.io/v1/chat/completions`；密钥和接口区域需要匹配。
+### 校验与训练流程冒烟测试
+
+训练数据采用 JSONL 序列格式。以下命令校验当前示例语料，并运行一个 epoch 来确认数据读取、反向传播和 checkpoint 保存链路可用：
+
+```powershell
+uv run --locked python scripts/validate_annotations.py data/annotations/kurisu_two_volumes_v0.jsonl
+uv run --locked python scripts/train.py --data data/annotations/kurisu_two_volumes_v0.jsonl --epochs 1 --batch-size 1 --val-ratio 0 --history-mode zeros --output artifacts/smoke-cfc512.pt
+```
+
+`--val-ratio 0` 只适用于这次流程检查，不用于模型评估。训练数据包含 36 段序列、1025 个事件步，属于未经独立人工确认的初始标注。上面的命令会生成 `artifacts/smoke-cfc512.pt`，可用于试玩闭环，但单 epoch 冒烟训练不代表模型已经具备可靠效果。默认 `--history-mode zeros` 可避免把前一时刻的目标状态直接作为下一步输入；验证历史条件字段时可显式选择 `--history-mode provided`。
+
+## 文档
+
+- [项目架构](docs/architecture.md)：模块职责与状态演化闭环
+- [核心模型技术方案](docs/core-model-technical-plan.md)：模型结构和技术决策
+- [CfC-512 第一版建立计划](docs/cfc-v0.1-implementation-plan.md)：当前阶段目标与验收门槛
+- [训练说明](docs/training-v0.1.md)：数据格式、历史条件和训练入口
+- [项目路线图](docs/roadmap.md)：后续阶段规划
 
 ## 设计边界
 
-NeuroBrain 负责内部状态和行为倾向，不直接替代 LLM，也不直接执行 Live2D、语音或其他外部动作。外部集成层负责将状态交给 LLM 或行为决策模块，再由具体执行器完成动作。
+NeuroBrain 负责连续内部状态与行为倾向，不替代语言模型，不直接决定最终台词，也不执行 Live2D、语音或其他外部动作。集成方可以把它的输出交给语言模型或行为决策模块，再由相应执行器完成动作。情绪和行为标签是建模目标与标注判断，应结合人工复核和独立评估解读。
