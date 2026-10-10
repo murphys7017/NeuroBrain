@@ -17,19 +17,20 @@
 ## 冒烟测试
 
 ```powershell
-uv run --locked python scripts/validate_annotations.py data/annotations/kurisu_trial_v0_compact.jsonl
+uv run --locked python scripts/validate_annotations.py data/annotations/kurisu_two_volumes_v0.jsonl
 uv run --locked python scripts/train.py `
-  --data data/annotations/kurisu_trial_v0_compact.jsonl `
-  --epochs 20 `
+  --data data/annotations/kurisu_two_volumes_v0.jsonl `
+  --epochs 1 `
+  --batch-size 1 `
   --val-ratio 0 `
   --history-mode zeros `
   --device cuda `
   --output artifacts/smoke-cfc512.pt
 ```
 
-`kurisu_trial_v0_compact.jsonl` 只有一条序列，因此这个命令只检查训练流程是否正常运行、损失是否下降以及 checkpoint 是否可以保存。训练脚本会对变长序列补零，并使用有效时间步掩码计算 Smooth L1 损失。
+`kurisu_two_volumes_v0.jsonl` 包含两卷小说的 LLM 标注序列。这个命令只检查训练流程是否正常运行以及 checkpoint 是否可以保存，不用于评估泛化能力。训练脚本会对变长序列补零，并使用有效时间步掩码计算 Smooth L1 损失。
 
-默认使用 `--history-mode zeros`。当前试标文件中的事件级 `historical_emotion` 大多等于前一事件的目标状态；直接将它作为模型输入会把目标信息泄漏到下一步。需要测试历史字段输入通路时，再显式使用 `--history-mode provided`。
+默认使用 `--history-mode zeros`。事件级 `historical_emotion` 通常等于前一事件的目标状态；直接将它作为模型输入会把目标信息泄漏到下一步。需要测试历史字段输入通路时，再显式使用 `--history-mode provided`。情绪与行为标签是 LLM 标注估计，不是人工确认的心理真值。
 
 ## 训练输出
 

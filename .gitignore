@@ -12,3 +12,11 @@ __pycache__/
 .DS_Store
 .jspace/
 artifacts/
+
+# Local annotation backups and intermediate review artifacts are not training inputs.
+data/annotations/archive/
+data/annotations/candidates/
+data/annotations/luna_review_batches/batch_*.jsonl
+data/annotations/luna_review_batches/manifest.json
+data/annotations/luna_review_batches/STRICT_LABEL_PROMPT.txt
+data/annotations/luna_review_results/

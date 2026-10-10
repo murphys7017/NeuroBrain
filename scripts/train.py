@@ -112,7 +112,7 @@ def main() -> None:
     sequences = _apply_history_mode(sequences, args.history_mode)
     train_sequences, validation_sequences = _split_sequences(sequences, args.val_ratio, args.seed)
     if not validation_sequences:
-        print("warning: no validation sequence; this is expected for a one-sequence smoke test")
+        print("warning: no validation sequence; this is expected when --val-ratio is 0")
 
     train_loader = _loader(train_sequences, args.batch_size, shuffle=True, seed=args.seed)
     validation_loader = (
