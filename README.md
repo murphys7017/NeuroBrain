@@ -69,17 +69,17 @@ uv run --locked python examples/interactive_demo.py
 
 ### 试用持续对话闭环
 
-角色测试 CLI 需要一个 CfC checkpoint 和可用的语言模型。它默认连接本机 Ollama 的 `qwen3.5:2b`，并默认读取 `artifacts/kurisu-two-volumes-baseline-cfc512.pt`。该 checkpoint 属于本地生成产物，不随仓库分发；如需从头体验闭环，可先运行下方的训练流程冒烟命令，再使用生成的 checkpoint。
+仓库包含基于当前标注语料训练 20 轮的 CfC-512 checkpoint：`artifacts/kurisu-two-volumes-baseline-cfc512.pt`。角色测试 CLI 默认连接本机 Ollama 的 `qwen3.5:2b`，并读取此 checkpoint，可直接体验对话闭环。它是原型模型，尚无独立评估结果，不代表已验证泛化能力。
 
 ```powershell
-uv run --locked python scripts/character_test.py --checkpoint artifacts/smoke-cfc512.pt
+uv run --locked python scripts/character_test.py
 ```
 
 省略 `--message` 会进入持续对话；输入 `/reset` 重置 CfC 隐状态和历史条件，输入 `/quit` 退出。加上 `--show-json` 可以查看完整诊断数据。使用 MiniMax 时，将 Subscription Key 放入环境变量后运行：
 
 ```powershell
 $env:MINIMAX_API_KEY = "你的 MiniMax Subscription Key"
-uv run --locked python scripts/character_test.py --provider minimax --checkpoint artifacts/smoke-cfc512.pt
+uv run --locked python scripts/character_test.py --provider minimax
 ```
 
 密钥不要写入代码或提交到仓库。MiniMax 默认使用中国站 OpenAI 兼容接口；国际站密钥可通过 `--endpoint https://api.minimax.io/v1/chat/completions` 指定对应接口。
@@ -93,7 +93,7 @@ uv run --locked python scripts/validate_annotations.py data/annotations/kurisu_t
 uv run --locked python scripts/train.py --data data/annotations/kurisu_two_volumes_v0.jsonl --epochs 1 --batch-size 1 --val-ratio 0 --history-mode zeros --output artifacts/smoke-cfc512.pt
 ```
 
-`--val-ratio 0` 只适用于这次流程检查，不用于模型评估。训练数据包含 36 段序列、1025 个事件步，属于未经独立人工确认的初始标注。上面的命令会生成 `artifacts/smoke-cfc512.pt`，可用于试玩闭环，但单 epoch 冒烟训练不代表模型已经具备可靠效果。默认 `--history-mode zeros` 可避免把前一时刻的目标状态直接作为下一步输入；验证历史条件字段时可显式选择 `--history-mode provided`。
+`--val-ratio 0` 只适用于这次流程检查，不用于模型评估。当前训练语料包含 36 段序列、1025 个事件步，未经独立人工确认；来源与覆盖信息见 `data/annotations/kurisu_two_volumes_v0_audit.jsonl`。上面的命令会生成 `artifacts/smoke-cfc512.pt`，可用于检查训练链路，但单 epoch 冒烟训练不代表模型已经具备可靠效果。默认 `--history-mode zeros` 可避免把前一时刻的目标状态直接作为下一步输入；验证历史条件字段时可显式选择 `--history-mode provided`。
 
 ## 文档
 
