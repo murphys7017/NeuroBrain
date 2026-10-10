@@ -97,6 +97,8 @@ uv run --locked python scripts/train.py --data data/annotations/kurisu_two_volum
 
 ## 文档
 
+- [Python 推理接口](docs/python-api.md)：单刺激输入、会话状态维护与只读状态查询
+- [合成状态动力学基准](docs/synthetic-benchmark.md)：随机老师数据、held-out 评估与恢复探针
 - [项目架构](docs/architecture.md)：模块职责与状态演化闭环
 - [核心模型技术方案](docs/core-model-technical-plan.md)：模型结构和技术决策
 - [CfC-512 第一版建立计划](docs/cfc-v0.1-implementation-plan.md)：当前阶段目标与验收门槛

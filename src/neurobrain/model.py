@@ -194,12 +194,23 @@ class NeuroBrainModel(nn.Module):
         *,
         map_location: str | torch.device | None = None,
         protocol_version: str = IO_PROTOCOL_VERSION,
+        expected_history_mode: str | None = None,
     ) -> "NeuroBrainModel":
         """Load a checkpoint created by :meth:`save_checkpoint`."""
 
         checkpoint = torch.load(path, map_location=map_location, weights_only=True)
         if checkpoint.get("protocol_version") != protocol_version:
             raise ValueError(f"checkpoint protocol version must be {protocol_version!r}")
+        checkpoint_history_mode = checkpoint.get("history_mode")
+        if (
+            expected_history_mode is not None
+            and checkpoint_history_mode is not None
+            and checkpoint_history_mode != expected_history_mode
+        ):
+            raise ValueError(
+                "checkpoint history_mode must be "
+                f"{expected_history_mode!r}, got {checkpoint_history_mode!r}"
+            )
         model = cls(**checkpoint["model_config"])
         model.load_state_dict(checkpoint["model_state_dict"])
         return model

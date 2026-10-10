@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .api import NeuroBrainSession, StateSnapshot
 from .data import (
     AnnotationDataset,
     AnnotationSequence,
@@ -75,7 +76,9 @@ __all__ = [
     "InputFrame",
     "ModelOutput",
     "NeuroBrainModel",
+    "NeuroBrainSession",
     "NeuroState",
+    "StateSnapshot",
     "SequenceBatch",
     "collate_sequences",
     "load_annotation_sequences",
