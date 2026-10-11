@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .api import NeuroBrainSession, StateSnapshot
+from .adapters.astrbot import (
+    ASTRBOT_TENDENCY_DIMENSIONS,
+    convert_astrbot_tendency_to_stimulus,
+)
 from .data import (
     AnnotationDataset,
     AnnotationSequence,
@@ -68,6 +72,7 @@ __all__ = [
     "BEHAVIOR_TENDENCY_DIMENSIONS",
     "AnnotationDataset",
     "AnnotationSequence",
+    "ASTRBOT_TENDENCY_DIMENSIONS",
     "CURRENT_STIMULUS_DIMENSIONS",
     "HISTORICAL_EMOTION_DIMENSIONS",
     "INPUT_DIMENSIONS",
@@ -81,5 +86,6 @@ __all__ = [
     "StateSnapshot",
     "SequenceBatch",
     "collate_sequences",
+    "convert_astrbot_tendency_to_stimulus",
     "load_annotation_sequences",
 ]

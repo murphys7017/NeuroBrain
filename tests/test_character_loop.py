@@ -66,8 +66,28 @@ def test_validate_roleplay_normalizes_tendency_and_defaults_final_result() -> No
     assert result["segments"][0]["tendency"]["Fear"] == 0.0
 
 
-def test_validate_roleplay_rejects_out_of_range_tendency() -> None:
-    with pytest.raises(ValueError, match=r"segments\[0\]\.tendency\.Joy"):
+def test_validate_roleplay_clamps_out_of_range_tendency() -> None:
+    result = validate_roleplay(
+        {
+            "segments": [
+                {
+                    "speech": "你好",
+                    "actions": [],
+                    "thought": "",
+                    "tendency": {"Joy": -1.0, "Anger": 11.0},
+                }
+            ],
+            "effect_calls": [],
+        }
+    )
+
+    assert result["segments"][0]["tendency"]["Joy"] == 0.0
+    assert result["segments"][0]["tendency"]["Anger"] == 10.0
+
+
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_validate_roleplay_rejects_non_finite_tendency(value: float) -> None:
+    with pytest.raises(ValueError, match="有限数字"):
         validate_roleplay(
             {
                 "segments": [
@@ -75,7 +95,7 @@ def test_validate_roleplay_rejects_out_of_range_tendency() -> None:
                         "speech": "你好",
                         "actions": [],
                         "thought": "",
-                        "tendency": {"Joy": 11.0},
+                        "tendency": {"Joy": value},
                     }
                 ],
                 "effect_calls": [],

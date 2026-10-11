@@ -9,6 +9,7 @@ Ollama and MiniMax share a small, dependency-free HTTP client interface.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import time
@@ -58,9 +59,9 @@ ROLEPLAY_SYSTEM_PROMPT = """你是一个小型角色扮演模型，扮演《Stei
 }
 
 tendency 是给 NeuroBrain 的本轮情绪输入，不是角色模型的自评，也不是最终状态。
-每个值使用 0 到 10 的整数或小数；程序会将它除以 10 后作为 NeuroBrain 的 0 到 1
-输入。它应表达这一段内容对角色当前反应的情绪倾向，不能直接填写 NeuroBrain 的最终
-输出。effect_calls 没有动作时使用空数组。"""
+每个值应使用 0 到 10 的整数或小数；程序会先把越界数值裁剪到 0 或 10，再除以 10
+作为 NeuroBrain 的 0 到 1 输入。它应表达这一段内容对角色当前反应的情绪倾向，不能
+直接填写 NeuroBrain 的最终输出。effect_calls 没有动作时使用空数组。"""
 
 
 FINALIZE_SYSTEM_PROMPT = """你是一个小型角色扮演模型，扮演《Steins;Gate》的牧濑红莉栖。
@@ -180,9 +181,9 @@ def _number(value: Any, *, minimum: float, maximum: float, name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise ValueError(f"{name} 必须是数字")
     result = float(value)
-    if not minimum <= result <= maximum:
-        raise ValueError(f"{name} 必须在 {minimum} 到 {maximum} 之间")
-    return result
+    if not math.isfinite(result):
+        raise ValueError(f"{name} 必须是有限数字")
+    return max(minimum, min(maximum, result))
 
 
 def validate_roleplay(value: Mapping[str, Any]) -> dict[str, Any]:
