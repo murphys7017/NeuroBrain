@@ -1,6 +1,6 @@
 # 外部集成
 
-本文说明外部服务如何把 NeuroBrain 当作一个持续状态组件调用。当前实现提供 Python API，不提供监听端口的 HTTP/WebSocket server；网络服务、鉴权、会话存储和限流由宿主应用负责。
+本文说明外部服务如何把 NeuroBrain 当作一个持续状态组件调用。除了 Python API，仓库现在提供一个可选的 JSON WebSocket 服务；服务仍由宿主负责启动、鉴权和进程生命周期。
 
 ## 集成边界
 
@@ -140,7 +140,25 @@ behaviors = get_session("character-42").read("behavior")
 
 ## 推荐的网络契约
 
-如果宿主应用要提供 HTTP，可以把 Python facade 包装成以下资源模型。下面是推荐契约，不是仓库已经实现的路由。
+如果不希望把 PyTorch/CUDA 安装到 AstrBot 环境，可以直接启动仓库自带的 WebSocket 服务：
+
+```powershell
+$env:NEUROBRAIN_WRITE_TOKEN = "replace-with-a-long-random-secret"
+uv run --locked python scripts/neurobrain_server.py `
+  --checkpoint artifacts/kurisu-two-volumes-baseline-cfc512.pt `
+  --device cpu `
+  --host 127.0.0.1 `
+  --port 8765 `
+  --write-token $env:NEUROBRAIN_WRITE_TOKEN
+```
+
+服务使用 `neurobrain-ws-v1` JSON 协议。writer 连接发送 `stimulus`，reader/writer 连接都可以发送 `get_state` 和 `subscribe`；只有 writer 可以 `reset`。`stimulus` 支持一个 `tendency` 或按顺序提交多个 `segments`，每个事件必须带唯一 `event_id`，重复事件只返回缓存快照而不会再次推进状态。服务端将每个 `state_key` 串行处理，并把状态更新广播给订阅者。
+
+服务必须配置非空 `--write-token` 或 `NEUROBRAIN_WRITE_TOKEN`；AstrBot 桥接插件的 `write_token` 必须使用同一值。reader 默认可免令牌查询和订阅；设置 `--read-token` 后，reader 必须使用读令牌或写令牌。读令牌不会获得写权限。
+
+AstrBot 桥接插件是 writer；其他插件通过桥接插件的只读 API 读取缓存状态。AG99live 可以作为同一 AstrBot 进程中的 reader 使用该 API，不需要修改既有 `output.segment.v5` 协议。
+
+如果宿主应用要提供 HTTP，也可以把 Python facade 包装成以下资源模型。下面的 HTTP 路由仍是推荐契约，不是仓库内置路由。
 
 ### 推进一个事件
 

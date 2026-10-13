@@ -10,6 +10,8 @@ def _model() -> NeuroBrainModel:
 def test_session_accepts_one_stimulus_and_reads_without_advancing() -> None:
     session = NeuroBrainSession(_model())
     assert session.read() is None
+    assert session.read("emotion") is None
+    assert session.read("behavior") is None
 
     first = session.update({"joy": 0.8, "anger": 0.1, "trust": 0.2, "fear": 0.0,
                             "surprise": 0.3, "sadness": 0.1, "disgust": 0.0,
@@ -19,11 +21,19 @@ def test_session_accepts_one_stimulus_and_reads_without_advancing() -> None:
     assert len(first.behavior) == 6
     assert session.read("joy") == first.emotion["joy"]
     assert session.read("avoidance") == first.behavior["avoidance"]
+    assert session.read("emotion") == first.emotion
+    assert session.read("behavior") == first.behavior
+    with pytest.raises(TypeError):
+        session.read("emotion")["joy"] = 0.0
 
     second_read = session.read()
     assert second_read is not None
     assert second_read.as_dict() == first.as_dict()
     assert session.read().step == 1
+    for name, value in first.emotion.items():
+        assert session.read(name) == value
+    for name, value in first.behavior.items():
+        assert session.read(name) == value
 
     second = session.update([0.0] * 8)
     assert second.step == 2

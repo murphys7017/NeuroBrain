@@ -8,6 +8,7 @@ dependencies = [
     "ncps==1.0.1",
     "numpy>=2.2.0",
     "torch==2.9.1+cu126",
+    "websockets>=15.0.1",
 ]
 
 [project.scripts]

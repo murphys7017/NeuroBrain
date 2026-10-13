@@ -79,3 +79,15 @@ h(t + Δt) = CfC(h(t), x(t), Δt)
 ## 六、扩展原则
 
 后续允许扩展隐状态规模、输出维度、输入编码、多时间尺度动态、历史条件专项训练、Memory 接入和持续训练。模型扩容或结构调整后允许重新训练或迁移参数，不要求新旧权重天然兼容。扩展取舍以可训练性、稳定性和实际心理表现为依据。
+
+## 七、当前运行方式
+
+当前模型已经提供两层调用接口：
+
+- `NeuroBrainSession`：面向业务集成，每次接收一个 8 维当前刺激，在 session 内保存隐状态，适合角色、Agent 和服务端宿主程序。
+- `NeuroBrainModel`：面向训练和实验，可以显式传入 8 维历史条件、每步 `delta_seconds` 和 `hidden_state`，适合批量序列和底层研究。
+
+公开 facade 将历史条件固定为全零，因此公开调用要求 checkpoint 使用 `history_mode=zeros`。
+仓库提供可选的 JSON WebSocket 状态服务，但不内置 HTTP；需要其他网络接口时仍由宿主应用包装
+Python facade。启动、checkpoint 和外部调用示例见 [上手与运行](getting-started.md)、
+[Python 推理接口](python-api.md) 和 [外部集成](integration.md)。

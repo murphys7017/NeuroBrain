@@ -23,6 +23,11 @@ from .protocol import (
     IO_PROTOCOL_VERSION,
     PSYCHOLOGICAL_STATE_DIMENSIONS,
 )
+from .ws_server import (
+    WS_PROTOCOL_VERSION,
+    NeuroBrainStateStore,
+    NeuroBrainWebSocketServer,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -82,8 +87,11 @@ __all__ = [
     "ModelOutput",
     "NeuroBrainModel",
     "NeuroBrainSession",
+    "NeuroBrainStateStore",
+    "NeuroBrainWebSocketServer",
     "NeuroState",
     "StateSnapshot",
+    "WS_PROTOCOL_VERSION",
     "SequenceBatch",
     "collate_sequences",
     "convert_astrbot_tendency_to_stimulus",

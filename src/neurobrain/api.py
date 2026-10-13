@@ -13,7 +13,7 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from os import PathLike
 from types import MappingProxyType
-from typing import Any, overload
+from typing import Any, Literal, overload
 
 import torch
 
@@ -97,59 +97,98 @@ class NeuroBrainSession:
     def update(self, stimulus: Mapping[str, float] | Sequence[float]) -> StateSnapshot:
         """Advance once with a named mapping or ordered 8-value sequence."""
 
-        values = self._normalize_stimulus(stimulus)
+        return self.update_many([stimulus])[-1]
+
+    def update_many(
+        self,
+        stimuli: Sequence[Mapping[str, float] | Sequence[float]],
+    ) -> tuple[StateSnapshot, ...]:
+        """Advance a sequence atomically, rolling back if any model step fails."""
+
+        if isinstance(stimuli, (str, bytes, bytearray)) or not isinstance(
+            stimuli, Sequence
+        ):
+            raise TypeError("stimuli must be a non-empty sequence")
+        if not stimuli:
+            raise ValueError("stimuli must be a non-empty sequence")
+        normalized = [self._normalize_stimulus(stimulus) for stimulus in stimuli]
+
         with self._lock, torch.inference_mode():
-            parameter = next(self._model.parameters())
-            current = torch.tensor(values, dtype=parameter.dtype, device=parameter.device)
-            history = torch.zeros_like(current)
-            output = self._model.step(
-                current,
-                history,
-                delta_seconds=self._delta_seconds,
-                hidden_state=self._hidden_state,
-            )
-            self._hidden_state = output.final_hidden.detach()
-            self._step += 1
-            self._latest = StateSnapshot(
-                step=self._step,
-                emotion=MappingProxyType(
-                    {
-                        name: float(value)
-                        for name, value in zip(
-                            CURRENT_STIMULUS_DIMENSIONS,
-                            output.emotion.detach().cpu().tolist(),
-                            strict=True,
-                        )
-                    }
-                ),
-                behavior=MappingProxyType(
-                    {
-                        name: float(value)
-                        for name, value in zip(
-                            BEHAVIOR_TENDENCY_DIMENSIONS,
-                            output.behavior.detach().cpu().tolist(),
-                            strict=True,
-                        )
-                    }
-                ),
-            )
-            return self._latest
+            previous_hidden_state = self._hidden_state
+            previous_latest = self._latest
+            previous_step = self._step
+            snapshots: list[StateSnapshot] = []
+            try:
+                parameter = next(self._model.parameters())
+                for values in normalized:
+                    current = torch.tensor(
+                        values,
+                        dtype=parameter.dtype,
+                        device=parameter.device,
+                    )
+                    history = torch.zeros_like(current)
+                    output = self._model.step(
+                        current,
+                        history,
+                        delta_seconds=self._delta_seconds,
+                        hidden_state=self._hidden_state,
+                    )
+                    self._hidden_state = output.final_hidden.detach()
+                    self._step += 1
+                    self._latest = StateSnapshot(
+                        step=self._step,
+                        emotion=MappingProxyType(
+                            {
+                                name: float(value)
+                                for name, value in zip(
+                                    CURRENT_STIMULUS_DIMENSIONS,
+                                    output.emotion.detach().cpu().tolist(),
+                                    strict=True,
+                                )
+                            }
+                        ),
+                        behavior=MappingProxyType(
+                            {
+                                name: float(value)
+                                for name, value in zip(
+                                    BEHAVIOR_TENDENCY_DIMENSIONS,
+                                    output.behavior.detach().cpu().tolist(),
+                                    strict=True,
+                                )
+                            }
+                        ),
+                    )
+                    snapshots.append(self._latest)
+            except Exception:
+                self._hidden_state = previous_hidden_state
+                self._latest = previous_latest
+                self._step = previous_step
+                raise
+            return tuple(snapshots)
 
     @overload
     def read(self) -> StateSnapshot | None: ...
 
     @overload
+    def read(self, name: Literal["emotion", "behavior"]) -> Mapping[str, float] | None: ...
+
+    @overload
     def read(self, name: str) -> float | None: ...
 
-    def read(self, name: str | None = None) -> StateSnapshot | float | None:
+    def read(
+        self,
+        name: str | None = None,
+    ) -> StateSnapshot | Mapping[str, float] | float | None:
         """Read the latest output, or one named dimension, without updating.
 
-        Returns ``None`` before the first update. Dimension names are the
-        protocol's emotion and behavior names, such as ``"joy"`` or
-        ``"avoidance"``.
+        Returns ``None`` before the first update. ``name`` can be an output
+        group (``"emotion"`` or ``"behavior"``) or any named dimension, such
+        as ``"joy"`` or ``"avoidance"``.
         """
 
         if name is not None and name not in (
+            "emotion",
+            "behavior",
             *CURRENT_STIMULUS_DIMENSIONS,
             *BEHAVIOR_TENDENCY_DIMENSIONS,
         ):
@@ -166,6 +205,10 @@ class NeuroBrainSession:
                     emotion=MappingProxyType(dict(self._latest.emotion)),
                     behavior=MappingProxyType(dict(self._latest.behavior)),
                 )
+            if name == "emotion":
+                return self._latest.emotion
+            if name == "behavior":
+                return self._latest.behavior
             if name in self._latest.emotion:
                 return self._latest.emotion[name]
             if name in self._latest.behavior:
