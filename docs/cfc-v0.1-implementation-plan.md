@@ -51,7 +51,7 @@ CfC 可以完成一次前向传播
 uv.lock 与项目配置一致，`uv lock --check` 通过
 ```
 
-项目固定使用 PyTorch 官方 `cu130` wheel 索引中的 Windows wheel（当前锁定 `torch 2.14.1+cu130`）。实际 CUDA 可用性与设备状态以 `scripts/check_environment.py` 的输出为准。
+项目固定使用 PyTorch 官方 `cu130` wheel 索引中的 Windows/Linux wheel（当前锁定 `torch 2.14.1+cu130`）。实际 CUDA 可用性与设备状态以 `scripts/check_environment.py` 的输出为准。
 
 ## 阶段二：确定并冻结基础协议
 

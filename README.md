@@ -22,7 +22,7 @@ NeuroBrain 是一个面向虚拟角色、对话系统和 Agent 的实验性连�
 
 ### 1. 安装环境
 
-需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。项目锁定了 PyTorch 2.14.1 的 CUDA 13.0 wheel；没有 NVIDIA GPU 也可以使用 CPU 推理，只是安装包仍然较大。
+需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。项目为 Windows/Linux 锁定了 PyTorch 2.14.1 的 CUDA 13.0 wheel；没有 NVIDIA GPU 也可以在这些平台上使用 CPU 推理，只是安装包仍然较大。macOS 需要单独配置 CPU-only PyTorch，当前锁文件不覆盖该环境。
 
 在 PowerShell 中执行：
 

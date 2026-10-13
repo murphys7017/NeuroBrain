@@ -20,10 +20,10 @@ NeuroBrain 目前有五种运行方式：
 - Python 3.11 或更高版本。
 - [uv](https://docs.astral.sh/uv/)。
 - CPU 可以运行推理和测试；NVIDIA GPU + CUDA 可以加速训练和基准。
-- Windows PowerShell、Linux shell 和 macOS shell 均可运行 Python 入口；本文命令使用 PowerShell 多行语法。
+- 本文命令使用 PowerShell 多行语法；当前 CUDA 13.0 锁文件适用于 Windows/Linux。macOS 需要另外配置 CPU-only PyTorch，当前锁文件不覆盖该环境。
 - 角色试玩额外需要一个可访问的 Ollama 或 MiniMax endpoint。
 
-项目依赖锁定了 PyTorch 2.14.1 CUDA 13.0 wheel。CPU-only 主机也可以安装和运行，但 PyTorch 安装包会比较大。
+项目依赖锁定了 PyTorch 2.14.1 CUDA 13.0 wheel。Windows/Linux CPU-only 主机也可以安装和运行，但 PyTorch 安装包会比较大。
 
 ## 安装
 
