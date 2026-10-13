@@ -51,7 +51,7 @@ CfC 可以完成一次前向传播
 uv.lock 与项目配置一致，`uv lock --check` 通过
 ```
 
-项目固定使用 PyTorch 官方 `cu126` wheel 索引中的 Windows wheel（当前锁定 `torch 2.9.1+cu126`）；本机驱动支持 CUDA 13.3，能够向后兼容 CUDA 12.6 runtime。实际环境以 `scripts/check_environment.py` 的输出为准。
+项目固定使用 PyTorch 官方 `cu130` wheel 索引中的 Windows wheel（当前锁定 `torch 2.14.1+cu130`）。实际 CUDA 可用性与设备状态以 `scripts/check_environment.py` 的输出为准。
 
 ## 阶段二：确定并冻结基础协议
 
@@ -185,6 +185,6 @@ CfC-512 建立完成后，再开始：
 ## 参考资料
 
 - [PyTorch 官方 Windows 安装说明](https://pytorch.org/get-started/locally/)
-- [PyTorch 2.9.1 官方 CUDA 12.6 wheel 安装说明](https://pytorch.org/get-started/previous-versions/)
+- [PyTorch 官方 CUDA wheel 安装说明](https://pytorch.org/get-started/previous-versions/)
 - [`ncps` CfC PyTorch 实现](https://github.com/mlech26l/ncps/blob/master/ncps/torch/cfc.py)
 - [`ncps` CfC 时间间隔批量广播问题](https://github.com/mlech26l/ncps/issues/83)

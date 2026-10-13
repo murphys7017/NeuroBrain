@@ -4,12 +4,13 @@
 
 ## 先理解项目的运行形态
 
-NeuroBrain 目前有四种运行方式：
+NeuroBrain 目前有五种运行方式：
 
 1. **库内嵌模式**：宿主 Python 进程导入 `NeuroBrainSession`，这是对外集成的推荐方式。
-2. **角色试玩模式**：`scripts/character_test.py` 调用 Ollama 或 MiniMax，再把结构化刺激交给 NeuroBrain。
-3. **实验模式**：运行训练脚本或合成基准，验证模型和数据流程。
-4. **WebSocket 服务模式**：独立进程加载 checkpoint，为 AstrBot 或其他宿主提供状态读写。
+2. **AstrBot 插件模式**：插件在 AstrBot 进程中加载 `NeuroBrainStateStore`，并把最新状态提供给提示词和其他插件。
+3. **角色试玩模式**：`scripts/character_test.py` 调用 Ollama 或 MiniMax，再把结构化刺激交给 NeuroBrain。
+4. **实验模式**：运行训练脚本或合成基准，验证模型和数据流程。
+5. **WebSocket 服务模式**：独立进程加载 checkpoint，为需要进程隔离的外部宿主提供状态读写。
 
 `uv run --locked neurobrain` 只是安装 smoke check；它不会监听端口。需要网络接口时，
 可以启动仓库自带的可选 WebSocket 服务；HTTP 或其他 RPC 仍由宿主自行包装，详见 [外部集成](integration.md)。
@@ -22,7 +23,7 @@ NeuroBrain 目前有四种运行方式：
 - Windows PowerShell、Linux shell 和 macOS shell 均可运行 Python 入口；本文命令使用 PowerShell 多行语法。
 - 角色试玩额外需要一个可访问的 Ollama 或 MiniMax endpoint。
 
-项目依赖锁定了 PyTorch 2.9.1 CUDA 12.6 wheel。CPU-only 主机也可以安装和运行，但 PyTorch 安装包会比较大。
+项目依赖锁定了 PyTorch 2.14.1 CUDA 13.0 wheel。CPU-only 主机也可以安装和运行，但 PyTorch 安装包会比较大。
 
 ## 安装
 

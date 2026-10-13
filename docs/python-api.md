@@ -223,7 +223,7 @@ NeuroBrain 负责：
 其他程序 → HTTP/WebSocket/gRPC/stdin → Python 适配层 → NeuroBrainSession
 ```
 
-适配层只需要把请求转成 `session.update(stimulus).as_dict()`，不需要改动模型。推荐的 HTTP 路由和错误映射见 [外部集成](integration.md)。仓库目前没有提供该网络服务，也没有固定端口。
+适配层只需要把请求转成 `session.update(stimulus).as_dict()`，不需要改动模型。仓库提供可选的 JSON WebSocket 服务；HTTP、gRPC 或其他接口仍由宿主自行包装。推荐的路由和错误映射见 [外部集成](integration.md)。
 
 ## 线程和进程
 

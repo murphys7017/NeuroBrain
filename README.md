@@ -11,17 +11,18 @@ NeuroBrain 是一个面向虚拟角色、对话系统和 Agent 的实验性连�
 - CfC-512 连续时间动力核心：32 维输入编码、512 维隐状态、8+6 维输出。
 - 单步和整段序列推理：底层 `NeuroBrainModel` 支持显式历史条件、时间间隔和隐状态传递。
 - 面向应用的 Python facade：`NeuroBrainSession` 每次只接收一个 8 维当前刺激，自动保留隐状态，随时可读最近结果。
+- 面向宿主的状态仓库：`NeuroBrainStateStore` 管理多个状态流，支持按事件 ID 幂等更新和只读快照。
 - 训练和 checkpoint：支持 JSONL 序列、变长批处理、掩码损失和带元数据的模型保存。
 - 合成状态动力学基准：独立生成训练、验证和测试序列，报告 held-out 误差、方向命中率和恢复探针。
 - 角色试玩 CLI：可连接本地 Ollama 或 MiniMax，展示角色回复、NeuroBrain 状态和诊断信息。
 
-当前公开调用边界是 Python API 和可选的 JSON WebSocket 服务。WebSocket 服务在独立 NeuroBrain 环境中加载 checkpoint，AstrBot 只通过结构化消息通信，从而避免 PyTorch/CUDA 依赖进入 AstrBot。具体适配方式见 [外部集成](docs/integration.md)。
+当前调用边界包括 Python API、进程内 `NeuroBrainStateStore` 和可选的 JSON WebSocket 服务。AstrBot 插件在 AstrBot 进程内加载状态仓库并直接运行推理，因此 AstrBot 环境需要安装 NeuroBrain 与 PyTorch 等运行依赖；若要隔离模型进程，可改用独立的 WebSocket 服务。具体适配方式见 [外部集成](docs/integration.md)。
 
 ## 快速开始
 
 ### 1. 安装环境
 
-需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。项目锁定了 PyTorch 2.9.1 的 CUDA 12.6 wheel；没有 NVIDIA GPU 也可以使用 CPU 推理，只是安装包仍然较大。
+需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。项目锁定了 PyTorch 2.14.1 的 CUDA 13.0 wheel；没有 NVIDIA GPU 也可以使用 CPU 推理，只是安装包仍然较大。
 
 在 PowerShell 中执行：
 
@@ -216,9 +217,11 @@ def handle_event(session_id: str, stimulus: dict[str, float]) -> dict:
 
 外部 LLM 或规则层负责把文本转成 8 维刺激；NeuroBrain 返回数值状态；宿主应用再把状态传给语言生成、行为决策或表现层。不要把不同角色共用一个 session，否则它们会共享隐状态。
 
-### 需要网络接口时
+AG99 的 AstrBot 环境使用 [进程内插件](https://github.com/murphys7017/astrbot_plugin_neurobrain)：插件在 AstrBot 启动时加载 `NeuroBrainStateStore`，Persona 结果推进状态，并把当前状态动态加入模型提示词；其他插件通过只读 API 获取快照。此模式直接在 AstrBot 进程中运行 PyTorch/CUDA，不使用 WebSocket。
 
-仓库提供一个可选的 JSON WebSocket 服务。它在 NeuroBrain 自己的环境中加载 checkpoint，
+### 需要进程隔离时
+
+仓库还提供可选的 JSON WebSocket 服务。它在 NeuroBrain 自己的环境中加载 checkpoint，
 外部宿主只需要发送结构化刺激或读取状态，不需要安装 PyTorch/CUDA：
 
 ```powershell
@@ -230,11 +233,10 @@ uv run --locked python scripts/neurobrain_server.py `
   --write-token $env:NEUROBRAIN_WRITE_TOKEN
 ```
 
-服务使用 `neurobrain-ws-v1`。AstrBot 桥接插件作为 writer 提交 Persona 的八维
-`tendency`，其他插件通过桥接插件暴露的只读 API 获取状态。AG99live 只把状态作为
-独立动作生成的附加上下文，不改变既有 `output.segment.v5` 消息。
-服务必须配置非空 writer token，并在 AstrBot 桥接插件的 `write_token` 中填写相同值；
-未配置读令牌时，reader 仍可免令牌读取，写入令牌也可以读取。
+服务使用 `neurobrain-ws-v1`，供需要进程隔离的外部客户端提交结构化刺激或读取状态。
+写入客户端必须配置非空 writer token；reader 未配置读令牌时可免令牌读取，写入令牌也可以读取。
+当前 AstrBot 插件使用进程内状态仓库，不连接此 WebSocket 服务；AG99live 通过插件只读 API
+在第三条动作链读取状态，不改变既有 `output.segment.v5` 消息。
 
 如果宿主更适合 HTTP，也可以提供以下薄适配层：
 

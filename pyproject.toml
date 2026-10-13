@@ -7,7 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "ncps==1.0.1",
     "numpy>=2.2.0",
-    "torch==2.9.1+cu126",
+    "torch==2.14.1+cu130",
     "websockets>=15.0.1",
 ]
 
@@ -22,12 +22,12 @@ build-backend = "uv_build"
 python-preference = "only-managed"
 
 [[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download-r2.pytorch.org/whl/cu126"
+name = "pytorch-cu130"
+url = "https://download-r2.pytorch.org/whl/cu130"
 explicit = true
 
 [tool.uv.sources]
-torch = { index = "pytorch-cu126" }
+torch = { index = "pytorch-cu130" }
 
 [dependency-groups]
 dev = [

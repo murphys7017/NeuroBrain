@@ -38,11 +38,13 @@
 - [x] 支持只读状态查询、单维查询和 reset
 - [x] 提供 API 文档、外部集成契约和错误映射说明
 - [x] 提供 Ollama/MiniMax 角色试玩闭环
-- [ ] 提供正式 HTTP/WebSocket/gRPC 适配服务
+- [x] 提供可选的 JSON WebSocket 适配服务
+- [x] 提供 AstrBot 进程内状态仓库插件适配
+- [ ] 提供 HTTP/gRPC 等其他适配服务
 - [ ] 提供隐状态持久化和跨进程恢复协议
 - [ ] 提供事件回放器和状态曲线可视化
 - [ ] 接入真实 Memory / Story 条件
-- [ ] 评估 AstrBot、AG99 和 Live2D 集成方式
+- [ ] 完成 AstrBot、AG99 和 Live2D 的真实运行验收
 
 ## 阶段 4：模型和数据迭代
 

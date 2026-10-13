@@ -59,6 +59,13 @@ state = session.update(stimulus)
 `tendency` 的心理语义。宿主应用仍负责决定何时把 Persona 结果作为一次新的
 NeuroBrain 输入，以及如何把 NeuroBrain 输出交给其他插件或表现层。
 
+### AstrBot 进程内插件
+
+AG99 使用的 [AstrBot 插件](https://github.com/murphys7017/astrbot_plugin_neurobrain)
+在 AstrBot 进程内创建 `NeuroBrainStateStore`，由 Persona 结果推进状态，并在每次模型提示词构建时读取当前快照。其他插件可以通过插件暴露的只读 API 查询状态；AG99live 在第三条动作链等待本轮结果对应的快照，不需要改变 `output.segment.v5` 协议。该插件不连接 WebSocket 服务。
+
+此模式会在 AstrBot 环境中加载 PyTorch/CUDA。插件仓库的 README 说明了如何安装 NeuroBrain 源码而不覆盖 AstrBot 锁定的运行依赖。
+
 ## 推荐的进程内调用
 
 模型只加载一次，每个角色或独立会话创建一个 session：
@@ -138,9 +145,9 @@ behaviors = get_session("character-42").read("behavior")
 
 每次事件的时间间隔默认是 `1.0` 秒。宿主可以在创建 session 时一次性覆盖这个固定配置，但不需要把时间或历史条件随每个事件传入。
 
-## 推荐的网络契约
+## 可选的网络契约
 
-如果不希望把 PyTorch/CUDA 安装到 AstrBot 环境，可以直接启动仓库自带的 WebSocket 服务：
+如果希望将模型进程与宿主隔离，可以启动仓库自带的 WebSocket 服务：
 
 ```powershell
 $env:NEUROBRAIN_WRITE_TOKEN = "replace-with-a-long-random-secret"
@@ -154,9 +161,9 @@ uv run --locked python scripts/neurobrain_server.py `
 
 服务使用 `neurobrain-ws-v1` JSON 协议。writer 连接发送 `stimulus`，reader/writer 连接都可以发送 `get_state` 和 `subscribe`；只有 writer 可以 `reset`。`stimulus` 支持一个 `tendency` 或按顺序提交多个 `segments`，每个事件必须带唯一 `event_id`，重复事件只返回缓存快照而不会再次推进状态。服务端将每个 `state_key` 串行处理，并把状态更新广播给订阅者。
 
-服务必须配置非空 `--write-token` 或 `NEUROBRAIN_WRITE_TOKEN`；AstrBot 桥接插件的 `write_token` 必须使用同一值。reader 默认可免令牌查询和订阅；设置 `--read-token` 后，reader 必须使用读令牌或写令牌。读令牌不会获得写权限。
+写入客户端必须配置非空 `--write-token` 或 `NEUROBRAIN_WRITE_TOKEN`。reader 默认可免令牌查询和订阅；设置 `--read-token` 后，reader 必须使用读令牌或写令牌。读令牌不会获得写权限。
 
-AstrBot 桥接插件是 writer；其他插件通过桥接插件的只读 API 读取缓存状态。AG99live 可以作为同一 AstrBot 进程中的 reader 使用该 API，不需要修改既有 `output.segment.v5` 协议。
+当前 AstrBot 插件使用进程内状态仓库，不连接此 WebSocket 服务。其他 AstrBot 插件通过该插件的只读 API 获取快照；AG99live 在第三条动作链读取本轮快照，不需要修改既有 `output.segment.v5` 协议。
 
 如果宿主应用要提供 HTTP，也可以把 Python facade 包装成以下资源模型。下面的 HTTP 路由仍是推荐契约，不是仓库内置路由。
 
